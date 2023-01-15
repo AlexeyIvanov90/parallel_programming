@@ -1,2 +1,2 @@
 all:
-	gcc -pthread main.c main.h -o prog
+	gcc main.c main.h -o prog -lm -lpthread

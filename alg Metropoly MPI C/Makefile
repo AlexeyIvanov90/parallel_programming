@@ -1,2 +1,2 @@
 all:
-	mpicc main.c main.h -o prog_mpi -lm
+	mpicc -o prog main.c main.h -lm

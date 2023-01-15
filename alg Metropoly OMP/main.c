@@ -92,9 +92,9 @@ int* alloc_1d_int(int n){
 	return m;
 }
 
+
 double* alloc_1d_double(int n){
 	double* m =	(double*)malloc(n * sizeof(double));
-
 	int i;
 	for(i = 0; i < n; i++){
 		m[i] = 0;
@@ -102,19 +102,20 @@ double* alloc_1d_double(int n){
 	return m;
 }
 
+
 void metropolis()
 {
 	//printf("ratio = %d M = %f E = %f\n", ratio, M, E);
 
 	int count;
-	bufer.r = alloc_1d_int(NUM_THREADS);
-	bufer.M = alloc_1d_double(NUM_THREADS);
-	bufer.E = alloc_1d_double(NUM_THREADS);
+	bufer.r = alloc_1d_int(THREADS);
+	bufer.M = alloc_1d_double(THREADS);
+	bufer.E = alloc_1d_double(THREADS);
 
 #pragma omp parallel
 	{
 	#pragma omp for
-		for (count = 0; count < (int)((SIZE * SIZE)/NUM_THREADS); count++)
+		for (count = 0; count < (int)((SIZE * SIZE)/THREADS); count++)
 		{
 			int row_segment_size = SIZE/omp_get_num_threads();
 
@@ -136,9 +137,8 @@ void metropolis()
 			}
 		}
 	}
-
 	int i;
-	for(i = 0; i < NUM_THREADS; i++){
+	for(i = 0; i < THREADS; i++){
 		ratio += bufer.r[i];
 		M += bufer.M[i];
 		E += bufer.E[i];
@@ -164,7 +164,7 @@ void step(int step)//step Monte Carlo
 
 int main()
 {
-	omp_set_num_threads(NUM_THREADS);
+	omp_set_num_threads(THREADS);
 
     double time_spent = 0.0;
     clock_t begin = clock();
@@ -172,20 +172,11 @@ int main()
 
 	init();
 
-	step(10000);
+	step(STEP);
 	output_data();
 
 	clock_t end = clock();
 	time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Program metropol use OMP and use %d threads work %f seconds\n", omp_get_max_threads() ,time_spent);
+    printf("Program metropol OMP (%d threads, %d size, %d step) %f seconds\n", omp_get_max_threads() , SIZE, STEP,time_spent);
     test();
 }
-
-/*
- *
- * 1000 step
- * 2 threads 23.5 sec
- * 4 threads 10 sec
- * 8 threads 3.5 sec
- *
- * */

@@ -1,43 +1,12 @@
 #include "main.h"
 
-short lattice[SIZE][SIZE];
-double w[5];
-double T = T_MAX, M, E;
-
-int ratio = 0;
-size_t nmcs = 0;
-double ecum = 0.0, e2cum = 0.0, mcum = 0.0, m2cum = 0.0;
-
-
-//структура для данных потока
-typedef struct{
-	int sigment;//номер сигмента
-	int ratio;
-	double M;
-	double E;
-} pthrData;
-
-
 void calcW()
 {
-	double e4 = exp(-4 / T), e8 = e4 * e4;
+	double e4 = exp(-1);
+	double e8 = e4 * e4;
 	w[0] = w[4] = e8;
 	w[1] = w[3] = e4;
 	w[2] = 0;
-}
-
-
-void create_data(){
-	printf("Start create data\n");
-	FILE * fp = fopen("data.txt", "w");
-	for (int i = 0; i < SIZE; i++)
-		for (int j = 0; j < SIZE; j++)
-		{
-			int random_number  = rand()%RAND_MAX;
-
-			fprintf(fp,"%d\n",random_number);//запись в файл
-		}
-	fclose(fp);
 }
 
 
@@ -68,7 +37,6 @@ void load_data(){
 void init()
 {
 	printf("Start initialization\n");
-	FILE * fp = fopen("data.txt", "r");
 	srand(time(NULL));
 
 	M = E = 0;
@@ -80,7 +48,6 @@ void init()
 			E += (i + 1 != SIZE) ? lattice[i][j] * lattice[i + 1][j] : 0;
 			E += (j + 1 != SIZE) ? lattice[i][j] * lattice[i][j + 1] : 0;
 		}
-	fclose(fp);
 	calcW();
 }
 
@@ -192,20 +159,11 @@ int main()
 
 	init();
 
-	step(10000);
+	step(STEP);
 	outputData();
 
 	clock_t end = clock();
 	time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Program linux pthreads work %f seconds\n", time_spent);
+    printf("Program linux pthreads(%d threads, %d size, %d step) work %f seconds\n", THREADS, SIZE, STEP, time_spent);
     test();
 }
-
-/*
- *
- * 10000 step
- * 2 pthreads 27 sec
- * 4 pthreads 23 sec
- * 8 pthreads 15 sec
- *
- */

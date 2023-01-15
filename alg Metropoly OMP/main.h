@@ -8,7 +8,8 @@
 #include "omp.h"
 
 #define SIZE 256
-#define NUM_THREADS 8
+#define THREADS 2
+#define STEP 1000
 
 struct data{
 	int* r;
@@ -18,16 +19,13 @@ struct data{
 
 struct data bufer;
 
-
 short lattice[SIZE][SIZE];
 double w[5];
 double M, E;
 
 int ratio = 0;
-unsigned int nmcs = 0;
+size_t nmcs = 0;
 double ecum = 0, e2cum = 0, mcum = 0, m2cum = 0;
-
-
 
 void calcW();//вычисление вероятностей перехода
 void init();//создание начальной конфигурации

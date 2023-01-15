@@ -9,7 +9,8 @@ double ecum = 0.0, e2cum = 0.0, mcum = 0.0, m2cum = 0.0;
 
 void calcW()
 {
-	double e4 = exp(-1), e8 = e4 * e4;
+	double e4 = exp(-1);
+	double e8 = e4 * e4;
 	w[0] = w[4] = e8;
 	w[1] = w[3] = e4;
 	w[2] = 0;
@@ -44,7 +45,6 @@ void load_data(){
 					lattice[rows][cols] = -1;
 				}
 			}
-			//printf("[%d][%d] = %d : %d\n",rows+1,cols+1,random_number,lattice[rows][cols]);
 		}
 	fclose(fp);
 }
@@ -73,7 +73,6 @@ void output_data()
 	printf("Cf = %f\n", ratio * norm);
 	printf("Avg energy = %f\n", ecum * norm);
 	printf("Avg energy = %f\n", e2cum * norm);
-
 }
 
 void test(){
@@ -145,17 +144,11 @@ int main()
 
 	init();
 
-	step(10000);
+	step(STEP);
 	output_data();
 
 	clock_t end = clock();
 	time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Program metropol work %f seconds\n", time_spent);
+    printf("Program metropol ( %d size, %d step) work %f seconds\n", SIZE, STEP, time_spent);
     test();
 }
-
-/*
- *
- *10000 step - 25-26 sec
- *
-  * */

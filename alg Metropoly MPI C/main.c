@@ -1,19 +1,5 @@
 #include "main.h"
 
-int lattice[SIZE][SIZE];
-int **segment;
-double w[5];
-double T = T_MAX, M = 0.0, E = 0.0;
-
-int ratio = 0;
-size_t nmcs = 0;
-double ecum = 0.0, e2cum = 0.0, mcum = 0.0, m2cum = 0.0;
-
-int size_mpi;
-int rank_mpi;
-
-MPI_Status status;
-
 void calcW()
 {
 	double e4 = exp(-1);
@@ -67,8 +53,6 @@ void init()
 
 
 void metropolis(){
-	printf("Start metropolis rank %d\n", rank_mpi);
-
 	int count;
     for(count = 0; count < (int)(SIZE / size_mpi) * SIZE; count++){
         int x = rand() % ((int)(SIZE / size_mpi) - 1);
@@ -87,16 +71,15 @@ void metropolis(){
             E -= 2 * segment[x][y] * sum_element;
         }
     }
-	printf("%d. E %f M %f ratio %d\n", rank_mpi, E, M, ratio);
 }
 
 
 void step(int step_monte_carlo){
 	int step_count;
     for(step_count=0; step_count<step_monte_carlo; step_count++){
-    	printf("Start step %d\n", step_count+1);
         metropolis();
         if(rank_mpi == 0){
+        	printf("step %d\n", step_count+1);
         	int num_range;
             for(num_range = 1; num_range < size_mpi; num_range++){
 
@@ -227,23 +210,16 @@ int main()
 	}
 
     segmentation();
-    step(10000);
+    step(STEP);
 
     if(rank_mpi == 0){
     	output_data();
     	test();
     	clock_t end = clock();
 		time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-		printf("Program metropol work %f seconds\n", time_spent);
+		printf("Program metropol MPI C (%d threads, %d size, %d step) work %f seconds\n", size_mpi, SIZE, STEP,time_spent);
     }
 
 	MPI_Finalize();
 	return 0;
 }
-
-
-/*
- *
- *
- *
- * */

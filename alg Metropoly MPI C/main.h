@@ -8,17 +8,27 @@
 #include <mpi.h>
 
 #define SIZE 256
-#define T_MAX 4
-#define CURIE_SCALE 1000.
+#define STEP 1000
 
-int **alloc_2d_int(int rows, int cols);
+int lattice[SIZE][SIZE];
+int **segment;
+double w[5];
+double M = 0.0, E = 0.0;
+
+int ratio = 0;
+size_t nmcs = 0;
+double ecum = 0.0, e2cum = 0.0, mcum = 0.0, m2cum = 0.0;
+
+int size_mpi;
+int rank_mpi;
+
+MPI_Status status;
 
 struct data_bufer{
 	double E;
 	double M;
 	int ratio;
 };
-
 
 void calcW();//вычисление вероятностей перехода
 void init();//создание начальной конфигурации
@@ -28,5 +38,6 @@ void output_data();//вычисление среднего на спин, выв
 void create_data();//создание файла с данными
 void load_data();//загрузка файла с данными
 void test();//проверка на корректность результата
+int **alloc_2d_int(int rows, int cols);
 
 #endif /* MAIN_H_ */

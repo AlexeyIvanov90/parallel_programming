@@ -7,8 +7,7 @@
 #include <math.h>
 
 #define SIZE 256
-#define T_MAX 4
-#define CURIE_SCALE 1000.
+#define STEP 2000
 
 void calcW();//вычисление вероятностей перехода
 void init();//создание начальной конфигурации

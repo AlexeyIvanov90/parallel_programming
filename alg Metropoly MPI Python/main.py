@@ -8,11 +8,9 @@ comm = MPI.COMM_WORLD
 rank_mpi = comm.Get_rank()
 size_mpi = comm.Get_size()
 
-SIZE = 256
-'''
-lattice = [[0] * SIZE for i in range(SIZE)]
-segment = [[0] * SIZE for i in range(int(SIZE / size_mpi))]  # размер массива
-'''
+SIZE = 1024
+STEP = 1000
+
 lattice = np.zeros((SIZE, SIZE))
 segment = np.zeros((int(SIZE / size_mpi), SIZE))
 
@@ -45,9 +43,7 @@ def load_data():
     fp = open("data.txt", "r")
     for i in range(SIZE):
         for j in range(SIZE):
-            # = rand()%RAND_MAX;
             random_number = int(fp.readline())
-            #print("[", i + 1, "][", j + 1, "] =", random_number)
             lattice[i][j] = ((random_number / float(0x7fff) >= 0.5) - 1) * 2 + 1
     fp.close()
     print("End load data\n")
@@ -70,7 +66,6 @@ def init():
 
 def metropolis():
     global ratio, M, E, w, segment
-    y = randint(0, SIZE - 1)
 
     for count in range(int(SIZE / size_mpi) * SIZE):
         x = randint(0, int(SIZE / size_mpi) - 1)
@@ -92,22 +87,23 @@ def step(step_monte_carlo=0):
     global nmcs, ecum, e2cum, mcum, m2cum, M, E, ratio
 
     for step_count in range(step_monte_carlo):
-        print(step_count + 1)
         metropolis()
         if rank_mpi == 0:
-            #for num_range in range(1, size_mpi):
-             #   buf = comm.recv(source=num_range, tag=3)
-              #  E += buf[0]
-               # M += buf[1]
-                #ratio += buf[2]
+            print("step ", step_count + 1)
+            for num_range in range(1, size_mpi):
+                buf = comm.recv(source=num_range, tag=3)
+                E += buf[0]
+                M += buf[1]
+                ratio += buf[2]
             nmcs += 1
             ecum += E
             e2cum += E * E
             mcum += M
             m2cum += M * M
         else:
-            #comm.send([E, M, ratio],dest=0, tag=3)
+            comm.send([E, M, ratio], dest=0, tag=3)
             M = E = ratio = 0
+
 
 def output_data():
     global E, M, ratio, ecum, e2cum, mcum, m2cum
@@ -140,7 +136,7 @@ def test():
               1.1 * math.fabs(test_avg_energi_spin))
 
 
-#разборка массивов в потоки
+# разборка массивов в потоки
 def segmentation():
     global segment
     if rank_mpi == 0:
@@ -172,10 +168,9 @@ if rank_mpi == 0:
     load_data()
     init()
 segmentation()
-step(1000)
+step(STEP)
 
 if rank_mpi == 0:
     output_data()
     test()
-    print("--- %s seconds ---" % (time.time() - start_time))
-
+    print("Program metropol MPI Python (thread ", size_mpi, ",size ", SIZE, ",step ", STEP, ") work ", (time.time() - start_time), " sec")
